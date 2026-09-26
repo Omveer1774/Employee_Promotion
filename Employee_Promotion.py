@@ -1,201 +1,216 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-# Agar aap TensorFlow use kar rahe hain toh ise uncomment karein:
-# import tensorflow as tf
-# Agar aap PyTorch use kar rahe hain toh ise uncomment karein:
-# import torch
-# import torch.nn as nn
+import time
 
-# --- 1. PAGE SETUP (Visual Improvement) ---
+# --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="Employee Promotion Predictor",
-    page_icon="🏆",
-    layout="centered"
+    page_title="Employee Promotion AI Predictor",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# --- 2. LOAD MODEL (Place your model loading logic here) ---
-@st.cache_resource
-def load_my_model():
-    """
-    Function to load your trained model.
-    Replace the dummy logic with your actual model loading code.
-    """
-    # EXAMPLE FOR TENSORFLOW:
-    # model = tf.keras.models.load_model('your_model.h5')
-    # return model
-
-    # DUMMY MODEL (Replace this with actual loading)
-    # This is just a placeholder because I don't have your .h5/.pth file.
-    class DummyModel:
-        def predict(self, data):
-            # Returns a random prediction (Yes/No) and a dummy probability
-            prob = np.random.rand()
-            return prob
-
-    st.warning("🔄 Loading Dummy Model. Replace with your actual model loading logic in the code.")
-    return DummyModel()
-
-# Load the model
-my_model = load_my_model()
-
-# --- 3. CUSTOM CSS FOR BETTER LOOKS ---
+# --- 2. ADVANCED CUSTOM CSS (PRO DESIGN) ---
 st.markdown("""
 <style>
-    .main-title {
+    /* Main Background & Fonts */
+    .stApp {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #f8fafc;
+    }
+    
+    /* Header Container */
+    .main-header {
+        background: rgba(30, 41, 59, 0.7);
+        padding: 2.5rem;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        margin-bottom: 2rem;
         text-align: center;
-        color: #1E3A8A; /* Dark Blue */
-        margin-bottom: 30px;
     }
-    .stButton>button {
-        background-color: #1E3A8A;
-        color: white;
+    .main-header h1 {
+        background: linear-gradient(90deg, #38bdf8, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    .main-header p {
+        color: #94a3b8;
+        font-size: 1.1rem;
+    }
+
+    /* Cards Styling */
+    .css-card {
+        background: rgba(30, 41, 59, 0.6);
+        padding: 1.8rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Input Section Header */
+    .section-title {
+        color: #38bdf8;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Result Banners */
+    .result-banner-yes {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.4) 100%);
+        border: 1px solid #10b981;
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+    }
+    .result-banner-no {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.4) 100%);
+        border: 1px solid #ef4444;
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+    }
+
+    /* Custom Button */
+    .stButton > button {
         width: 100%;
-        border-radius: 8px;
-        font-weight: bold;
+        background: linear-gradient(90deg, #0284c7, #6366f1);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
     }
-    .stButton>button:hover {
-        background-color: #172554; /* Darker Blue on hover */
-        border-color: #172554;
-    }
-    .prediction-container {
-        border-radius: 10px;
-        padding: 20px;
-        margin-top: 20px;
-    }
-    .promoted {
-        background-color: #D1FAE5; /* Light Green */
-        color: #065F46; /* Dark Green */
-    }
-    .not-promoted {
-        background-color: #FEE2E2; /* Light Red */
-        color: #991B1B; /* Dark Red */
+    .stButton > button:hover {
+        background: linear-gradient(90deg, #0369a1, #4f46e5);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 4. APP TITLE & HEADER ---
-st.markdown('<h1 class="main-title">Employee Promotion Prediction 🏆</h1>', unsafe_allow_html=True)
-st.write("Enter the employee's details below to predict their likelihood of promotion.")
+# --- 3. DUMMY MODEL LOAD (Replace with your model) ---
+@st.cache_resource
+def load_ann_model():
+    # Replace this with: return tf.keras.models.load_model('model.h5')
+    return None
 
-# --- 5. THE USER INTERFACE (INPUT FORM) ---
-# We use st.form to group the inputs and submit button together
-with st.form("employee_details_form"):
-    st.subheader("📋 Employee Input Details")
+model = load_ann_model()
+
+# --- 4. HEADER ---
+st.markdown("""
+<div class="main-header">
+    <h1>Employee Promotion Intelligence</h1>
+    <p>Artificial Neural Network (ANN) Powered Evaluation Dashboard</p>
+</div>
+""", unsafe_allow_html=True)
+
+# --- 5. SIDEBAR - INPUT FORM ---
+st.sidebar.markdown("## 🎛️ Candidate Parameters")
+st.sidebar.markdown("Fill in the employee details to run the ANN assessment.")
+
+with st.sidebar.form("input_form"):
+    st.markdown("### 👤 Demographic & Education")
+    education = st.selectbox("Education Level", ["Bachelors", "Masters & above", "Below Secondary"])
+    gender = st.selectbox("Gender", ["Male", "Female"])
+    age = st.slider("Age (Years)", 20, 60, 30)
     
-    # Arrange inputs in columns for cleaner layout
-    col1, col2 = st.columns(2)
+    st.markdown("---")
+    st.markdown("### 📊 Performance Metrics")
+    department = st.selectbox("Department", ["Sales & Marketing", "Operations", "Technology", "Analytics", "R&D", "Procurement", "HR"])
+    no_of_trainings = st.number_input("Trainings Completed", 1, 10, 1)
+    avg_training_score = st.slider("Avg Training Score (0-100)", 30, 100, 65)
+    previous_year_rating = st.selectbox("Previous Year Rating", [1.0, 2.0, 3.0, 4.0, 5.0], index=2)
     
-    with col1:
-        education = st.selectbox(
-            "Highest Education Level",
-            ("Bachelors", "Masters", "Below Secondary")
-        )
-        gender = st.radio("Gender", ("Male", "Female"), horizontal=True)
-        no_of_trainings = st.number_input(
-            "Number of Trainings Completed",
-            min_value=1, max_value=10, value=1, step=1
-        )
-        age = st.number_input(
-            "Employee Age",
-            min_value=18, max_value=60, value=30, step=1
-        )
+    st.markdown("---")
+    st.markdown("### 🏆 Achievements")
+    length_of_service = st.slider("Length of Service (Years)", 1, 30, 5)
+    kpis_met = st.checkbox("KPIs Met > 80%?", value=True)
+    awards_won = st.checkbox("Awards Won in Last Year?", value=False)
+
+    predict_btn = st.form_submit_button("🚀 Run Evaluation")
+
+# --- 6. MAIN CONTENT AREA ---
+col_left, col_right = st.columns([1.2, 1])
+
+with col_left:
+    st.markdown("""
+    <div class="css-card">
+        <div class="section-title">📌 Candidate Snapshot</div>
+    """, unsafe_allow_html=True)
+    
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Department", department)
+    m2.metric("Experience", f"{length_of_service} Yrs")
+    m3.metric("Last Rating", f"{previous_year_rating} ⭐")
+
+    m4, m5, m6 = st.columns(3)
+    m4.metric("Trainings", no_of_trainings)
+    m5.metric("Avg Score", f"{avg_training_score}/100")
+    m6.metric("Awards", "Yes" if awards_won else "No")
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with col_right:
+    st.markdown("""
+    <div class="css-card">
+        <div class="section-title">📊 Analytics Overview</div>
+        <p style="color: #94a3b8; font-size: 0.95rem;">
+            The model analyzes key factors such as <b>KPI completion</b>, <b>training scores</b>, and <b>years of service</b> using deep neural layers.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# --- 7. PREDICTION RESULT LOGIC ---
+if predict_btn:
+    with st.spinner("Processing features through Neural Network..."):
+        time.sleep(1) # Visual effect
         
-    with col2:
-        length_of_service = st.number_input(
-            "Length of Service (in years)",
-            min_value=1, max_value=40, value=5, step=1
-        )
-        kpis_met = st.selectbox(
-            "KPIs Met (>80%)?",
-            ("Yes", "No")
-        )
-        awards_won = st.selectbox(
-            "Awards Won in Last Year?",
-            ("Yes", "No")
-        )
-        avg_training_score = st.slider(
-            "Average Training Score (0-100)",
-            min_value=0.0, max_value=100.0, value=65.0, step=0.1
-        )
+        # PREPROCESSING LOGIC PLACEHOLDER
+        # Format your input features as required by scaler/encoder
+        # e.g., features = np.array([[...]])
+        
+        # DUMMY PREDICTION (Replace with your actual model logic)
+        # score = model.predict(features)[0][0]
+        score = np.random.uniform(0.3, 0.95) # Dummy dynamic probability for demo
+        is_promoted = score >= 0.5
 
-    # Submit button for the form
-    submit_button = st.form_submit_button(label="Analyze & Predict")
-
-# --- 6. PREDICTION LOGIC ---
-if submit_button:
-    # --- 6a. PREPROCESS INPUTS ---
-    # Convert inputs to the format your model expects (e.g., one-hot encoding, normalization)
+    st.markdown("---")
     
-    # Step 1: Create a dictionary from user inputs
-    input_data = {
-        'no_of_trainings': no_of_trainings,
-        'age': age,
-        'previous_year_rating': 3.0, # Dummy value if not input
-        'length_of_service': length_of_service,
-        'kpis_met': 1 if kpis_met == "Yes" else 0,
-        'awards_won': 1 if awards_won == "Yes" else 0,
-        'avg_training_score': avg_training_score,
-        'education': education,
-        'gender': gender
-    }
-    
-    # Step 2: Convert to DataFrame for easier preprocessing
-    input_df = pd.DataFrame([input_data])
-    
-    # Step 3: APPLY ACTUAL PREPROCESSING (This depends on how you trained your model)
-    # Examples:
-    # 1. One-hot encoding for categorical variables: 'education', 'gender'
-    #    (You might need to make sure the columns match your training data exactly)
-    # 2. Scaling numerical variables: 'age', 'avg_training_score', etc.
+    if is_promoted:
+        st.balloons()
+        st.markdown(f"""
+        <div class="result-banner-yes">
+            <h2 style="color: #10b981; margin: 0;">🎉 High Likelihood of Promotion</h2>
+            <h1 style="color: #ffffff; font-size: 3.5rem; margin: 0.5rem 0;">{score*100:.1f}%</h1>
+            <p style="color: #a7f3d0; margin: 0;">This employee satisfies key threshold metrics for recommendation.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+        <div class="result-banner-no">
+            <h2 style="color: #ef4444; margin: 0;">⚠️ Promotion Not Recommended</h2>
+            <h1 style="color: #ffffff; font-size: 3.5rem; margin: 0.5rem 0;">{score*100:.1f}%</h1>
+            <p style="color: #fca5a5; margin: 0;">Employee needs improvement in performance rating or training score metrics.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # DUMMY PREPROCESSING (Replace with actual)
-    # For now, we just pass raw numbers for the 7 numerical inputs to match the Dummy model
-    preprocessed_data = np.array([[
-        no_of_trainings, age, 3.0, length_of_service, 
-        1 if kpis_met == "Yes" else 0, 
-        1 if awards_won == "Yes" else 0, 
-        avg_training_score
-    ]])
+    # Progress bar visualization
+    st.write("")
+    st.write("### Model Confidence Gauge")
+    st.progress(float(score))
 
-    # Show a progress spinner while the model predicts
-    with st.spinner("Analyzing data and generating prediction..."):
-        # --- 6b. MAKE PREDICTION ---
-        try:
-            # The structure must match how you preprocessed and fed data during training
-            prediction_probability = my_model.predict(preprocessed_data)
-            
-            # --- 6c. DISPLAY RESULTS ---
-            st.divider()
-            st.subheader("🎯 Prediction Result")
-
-            # Determine promotion status based on probability threshold (e.g., 0.5)
-            # Adjust the threshold as per your model performance
-            threshold = 0.5
-            is_promoted = prediction_probability >= threshold
-            
-            # Formatted output
-            if is_promoted:
-                st.balloons()
-                st.markdown(f"""
-                <div class="prediction-container promoted">
-                    <strong>Prediction: PROMOTED (YES)</strong><br>
-                    Probability of Promotion: {prediction_probability:.2f}
-                </div>
-                """, unsafe_allow_html=True)
-                st.success("Analysis suggests this employee has a high chance of being recommended for promotion.")
-            else:
-                st.markdown(f"""
-                <div class="prediction-container not-promoted">
-                    <strong>Prediction: NOT PROMOTED (NO)</strong><br>
-                    Probability of Promotion: {prediction_probability:.2f}
-                </div>
-                """, unsafe_allow_html=True)
-                st.warning("Analysis suggests this employee has a lower chance of being recommended for promotion at this time.")
-                
-        except Exception as e:
-            st.error(f"Error during prediction. Please check model input compatibility. Error: {e}")
-
-# --- 7. FOOTER ---
-st.write("---")
-st.caption("Developed by Omveer | Performance Metrics App")
+st.markdown("<br><hr><center style='color:#64748b;'>ANN Employee Promotion Dashboard • Omveer</center>", unsafe_allow_html=True)
